@@ -26,7 +26,7 @@ class ComportamientoJugador : public Comportamiento{
       for(unsigned int i = 0; i<size; i++)
           mapaDescubierto.push_back(aux);
 
-
+}
     
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -36,9 +36,11 @@ class ComportamientoJugador : public Comportamiento{
 
     int interact(Action accion, int valor);
 
-    int objeto_mochila(Sensores sensores,unsigned char objeto);
+    int Objeto_mochila(unsigned char objeto);
 
-    void RellenaMapa(int brujula);
+    void RellenaMapa(Sensores sensores,int brujula);
+
+    void DecisionObjeto(unsigned char obstaculo);
 
 
     ComportamientoJugador * clone(){return new ComportamientoJugador(*this);}
