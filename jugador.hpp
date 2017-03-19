@@ -19,10 +19,10 @@ class ComportamientoJugador : public Comportamiento{
     	ultimaAccion=actIDLE;
     	girar_derecha=false;
     	bien_situado=false;
-      cont=1;
 
        x= 200;
        y=200;
+       aux=true;
 
       std::vector< unsigned char> aux(mapaResultado.size(), '?');
       
@@ -30,22 +30,20 @@ class ComportamientoJugador : public Comportamiento{
           mapaDescubierto.push_back(aux);
 
        
-       std::vector< unsigned char> aux1(400, '?');
+       std::vector< unsigned char> aux1(401, '?');
       
-      for(unsigned int i = 0; i<400; i++)
+      for(unsigned int i = 0; i<401; i++)
           mapaPrueba.push_back(aux1);
 
 
-        std::vector<int> aux2(400,0);
-      
-      for(unsigned int i = 0; i<400; i++)
-          mapaPulgarcitoAux.push_back(aux2);
-
-
-        std::vector<int> aux3(mapaResultado.size(),0);
+      /*  std::vector<int> aux2(mapaResultado.size(),0);
       
       for(unsigned int i = 0; i<mapaResultado.size(); i++)
-          mapaPulgarcito.push_back(aux3);
+          mapapulgarcito.push_back(aux2);
+*/
+
+
+
 
 }
     
@@ -74,13 +72,11 @@ class ComportamientoJugador : public Comportamiento{
   	int fil,col,brujula;  //donde estoy? y hacia donde voy?
   	bool bien_situado;
   	Action ultimaAccion;
-  	bool girar_derecha;
+  	bool girar_derecha,aux;
     std::vector< std::vector< unsigned char> > mapaDescubierto;
-    std::vector< std::vector< unsigned char> > mapaPrueba;
-     std::vector< std::vector< int> > mapaPulgarcito;
-      std::vector< std::vector<int> > mapaPulgarcitoAux;
+        std::vector< std::vector< unsigned char> > mapaPrueba;
 
-    int x,y,cont;
+    int x,y;
 
 };
 
