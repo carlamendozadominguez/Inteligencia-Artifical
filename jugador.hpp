@@ -20,9 +20,8 @@ class ComportamientoJugador : public Comportamiento{
     	girar_derecha=false;
     	bien_situado=false;
 
-       x= 200;
-       y=200;
-       aux=true;
+       x=99;
+       y=99;
 
       std::vector< unsigned char> aux(mapaResultado.size(), '?');
       
@@ -30,17 +29,17 @@ class ComportamientoJugador : public Comportamiento{
           mapaDescubierto.push_back(aux);
 
        
-       std::vector< unsigned char> aux1(401, '?');
+       std::vector< unsigned char> aux1(200, '?');
       
-      for(unsigned int i = 0; i<401; i++)
+      for(unsigned int i = 0; i<200; i++)
           mapaPrueba.push_back(aux1);
 
 
-      /*  std::vector<int> aux2(mapaResultado.size(),0);
+        std::vector<int> aux2(mapaResultado.size(),0);
       
-      for(unsigned int i = 0; i<mapaResultado.size(); i++)
-          mapapulgarcito.push_back(aux2);
-*/
+     /for(unsigned int i = 0; i<mapaResultado.size(); i++)
+          mapaPulgarcito.push_back(aux2);
+
 
 
 
@@ -72,7 +71,7 @@ class ComportamientoJugador : public Comportamiento{
   	int fil,col,brujula;  //donde estoy? y hacia donde voy?
   	bool bien_situado;
   	Action ultimaAccion;
-  	bool girar_derecha,aux;
+  	bool girar_derecha;
     std::vector< std::vector< unsigned char> > mapaDescubierto;
         std::vector< std::vector< unsigned char> > mapaPrueba;
 

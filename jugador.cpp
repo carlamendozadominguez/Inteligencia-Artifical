@@ -18,28 +18,24 @@ Action ComportamientoJugador::think(Sensores sensores){
     	ultimaAccion=actIDLE;
     	girar_derecha=false;
     	bien_situado=false;
-        x=200;
-        y=200;
-		fil=99;
-		col=99;
-		
-
-		cout<<"PK:"<<sensores.mensajeF<<","<<sensores.mensajeC<<endl;
-
-
+        x=99;
+        y=99;
+        
+        
         for(int i = 0 ; i < mapaPrueba.size() ; i++){
     		for(int j = 0 ; j < mapaPrueba.at(i).size() ;j++){
     			mapaPrueba[i][j]='?';
     		}
     	}
 
-	  /*for(int i = 0 ; i < mapaDescubierto.size() ; i++){
+    	/*for(int i = 0 ; i < mapaDescubierto.size() ; i++){
     		for(int j = 0 ; j < mapaDescubierto.at(i).size() ;j++){
     			mapaDescubierto[i][j]='?';
 
     			cout<<mapaDescubierto[i][j];
     		}
-    	}*/
+    	}
+*/
 }
 		/*for(std::vector<unsigned char> v: mapaResultado){
 			for (unsigned char c : v)
@@ -67,6 +63,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	// En esta matriz de tamano 100x100 hay que escribir el mapa solucion
 	// mapaResultado[fila][columna] = lo que hay en fila columna
 
+if(!sensores.colision){
 	switch(ultimaAccion){
 
 		case actFORWARD:
@@ -96,6 +93,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 		break;
 
+
 //La brujula solo cambia cuando se realiza un giro
 
 		case actTURN_R:
@@ -121,6 +119,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		break;
 	}
 
+}
 
 
 	//Cuando hayamos muerto se nos copiara lo descubierto en la matriz original (mapaResultado)
@@ -131,39 +130,27 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}*/
 
 if(!bien_situado){
-
-
 	RellenaMapa(sensores,brujula,false);
-							cout<<"PK copy:"<<sensores.mensajeF<<","<<sensores.mensajeC<<endl;
-
-	for (int i = 0; i < mapaResultado.size(); ++i){
-			for(int j = 0; j < mapaResultado.at(i).size(); ++j){
-				//mapaResultado[i][j]=mapaDescubierto[i][j];
-				//if(mapaDescubierto[i][j]=='?')
-
-					mapaDescubierto[i][j]=mapaPrueba[x-sensores.mensajeF+i][y-sensores.mensajeC+j];
+	
 }
-				cout<<"X:"<<x<<endl;
-				cout<<"Y:"<<y<<endl;
-
-	}
-}
-
 	else {
 
-		cout<<"PK:"<<sensores.mensajeF<<","<<sensores.mensajeC<<endl;
+		RellenaMapa(sensores, brujula,false);
 
+			for (int i = 0; i < mapaPrueba.size(); ++i){
+			for(int j = 0; j < mapaPrueba.at(i).size(); ++j)
 
-		RellenaMapa(sensores, brujula,true);
+				if(mapaPrueba[i][j]!='?')
+					mapaResultado[i-(x-fil)][j-(y-col)]=mapaPrueba[i][j];
+}	
 
-		for (int i = 0; i < mapaResultado.size(); ++i){
+		/*for (int i = 0; i < mapaResultado.size(); ++i){
 			for(int j = 0; j < mapaResultado.at(i).size(); ++j)
-				if(mapaResultado[i][j]=='?')				
+				if(mapaResultado[i][j]=='?')
 				mapaResultado[i][j]=mapaDescubierto[i][j];
-				//if(mapaDescubierto[i][j]!='?')
 					//mapaResultado[i][j]=mapaPrueba[x-sensores.mensajeF+i][y-sensores.mensajeC+j];
 		
-	}
+	}*/
 }
 
 
@@ -188,6 +175,98 @@ if(!bien_situado){
 
 //avanzaremos si estamos en terreno arenoso o pedregoso y no hay ningun objeto 
 //o personaje en esa casilla
+
+
+
+
+	if(bien_situado){
+		int min = numeric_limits<int>::max();
+
+
+
+		cout<<"MINIMO:jhjk"<<min<<endl;		
+
+		int min_i, min_j;
+		for(int i = 0; i < 3; i++){
+			for(int j = 0; j < 3; j++){
+					cout<<"Orientacion:"<<brujula<<endl<<endl;
+				  cout<<"for["<<i-1<<"]["<<j-1<<"]"<<endl;
+
+				  cout<<"Que hay en mapaPulgarcito:"<<mapaPulgarcito[i-1+fil][j-1+col] <<endl;
+
+				  cout<<"MIN:"<<min<<endl;
+
+				if(mapaPulgarcito[i-1+fil][j-1+col] < min && mapaPulgarcito[i-1+fil][j-1+col]> -1 && (i-1)!=0 && (j-1)!=0) {
+					min = mapaPulgarcito[i-1+fil][j-1+col];
+					
+							cout<<"MINIMO:"<<min<<endl;
+
+
+					min_i = i-1;
+					min_j = j-1;
+				}
+			}
+
+			cout<<"hola"<<endl;
+		}
+
+		cout << min_i << " " << min_j << " " << mapaPulgarcito[min_i+fil][min_j+col]<<endl; ;
+
+
+		switch(brujula) {
+
+			//norte
+			case 0:
+				if(min_i == -1 && min_j == -1 ){accion = actFORWARD;}
+				else if(min_i == -1 && min_j == 0){ accion = actFORWARD;}
+				else if(min_i == -1 && min_j == 1){ accion = actFORWARD;}
+				else if(min_i == 0 && min_j == -1){ accion = actTURN_L;}
+				else if(min_i == 0 && min_j == 1){accion = actTURN_R;}
+				else if(min_i == 1 && min_j == -1){accion = actTURN_L;}
+				else if(min_i == 1 && min_j == 0){accion = actTURN_R;}
+				else {accion = actTURN_R;}
+				break;
+
+			//este
+			case 1:
+				if(min_i == -1 && min_j == -1 ){accion = actTURN_L;}
+				else if(min_i == -1 && min_j == 0){accion = actTURN_L;}
+				else if(min_i == -1 && min_j == 1){accion = actFORWARD;}
+				else if(min_i == 0 && min_j == -1){accion = actTURN_R;}
+				else if(min_i == 0 && min_j == 1){accion = actFORWARD;}
+				else if(min_i == 1 && min_j == -1){accion = actTURN_R;}
+				else if(min_i == 1 && min_j == 0){accion = actTURN_R;}
+				else {accion = actFORWARD;}
+				break;
+
+			//sur
+			case 2:
+				if(min_i == -1 && min_j == -1 ){accion = actTURN_L;}
+				else if(min_i == -1 && min_j == 0){accion = actTURN_R;}
+				else if(min_i == -1 && min_j == 1){accion = actTURN_L;}
+				else if(min_i == 0 && min_j == -1){accion = actTURN_R;}
+				else if(min_i == 0 && min_j == 1){accion = actTURN_R;}
+				else if(min_i == 1 && min_j == -1){accion = actFORWARD;}
+				else if(min_i == 1 && min_j == 0){accion = actFORWARD;}
+				else {accion = actFORWARD;}
+				break;
+
+			//oeste
+			case 3:
+				if(min_i == -1 && min_j == -1 ){accion = actFORWARD;}
+				else if(min_i == -1 && min_j == 0){accion = actTURN_R;}
+				else if(min_i == -1 && min_j == 1){accion = actTURN_R;}
+				else if(min_i == 0 && min_j == -1){accion = actFORWARD;}
+				else if(min_i == 0 && min_j == 1){accion = actTURN_L;}
+				else if(min_i == 1 && min_j == -1){accion = actFORWARD;}
+				else if(min_i == 1 && min_j == 0){accion = actTURN_L;}
+				else {accion = actTURN_L;}
+				break;
+
+		}
+
+	}
+
 
 
 	if((sensores.terreno[2]=='T'||sensores.terreno[2]=='S'||sensores.terreno[2]=='K') && sensores.superficie[2]=='_') {
