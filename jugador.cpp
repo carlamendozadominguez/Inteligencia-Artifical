@@ -11,6 +11,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	Action accion = actIDLE;
 
 
+//Cuando reinicio la partida los valores vuelven a como estaban por defecto
 
 	if(sensores.vida == 0 || sensores.vida == 1000){
 		
@@ -22,138 +23,101 @@ Action ComportamientoJugador::think(Sensores sensores){
         y=99;
         
         
+
+       //Limpio el mapa cuando muero
+
         for(int i = 0 ; i < mapaPrueba.size() ; i++){
     		for(int j = 0 ; j < mapaPrueba.at(i).size() ;j++){
     			mapaPrueba[i][j]='?';
     		}
     	}
 
-    	/*for(int i = 0 ; i < mapaDescubierto.size() ; i++){
-    		for(int j = 0 ; j < mapaDescubierto.at(i).size() ;j++){
-    			mapaDescubierto[i][j]='?';
-
-    			cout<<mapaDescubierto[i][j];
-    		}
-    	}
-*/
 }
-		/*for(std::vector<unsigned char> v: mapaResultado){
-			for (unsigned char c : v)
-			{
-				cout << c;
-			}
-		}*/
+	
+//Servira para movernos por el mapa (x,y)--> movernos por mapaPrueba  (fil,col)--> movernos por el mapaResultado
+
+	if(!sensores.colision){
+		switch(ultimaAccion){
+
+			case actFORWARD:
+				switch(brujula){
+
+					case 0:		//NORTE
+					  fil--;
+					  x--;
+					 break;
+
+					 case 1:	//ESTE
+					   col++;
+					   y++;
+					 break;
+
+					 case 2:	//SUR
+					 	fil++;
+					 	x++;
+					 break;
+
+					 case 3:	//OESTE
+					 	col--;
+					 	y--;
+					 break;
+
+				}
+
+			break;
+
+
+	//La brujula solo cambia cuando se realiza un giro
+
+			case actTURN_R:
+				brujula=(brujula+1)%4;
+
+				if(rand()%2==0)
+				girar_derecha=true;
+			else
+				girar_derecha=false;
+
+			break;
 
 
 
+			case actTURN_L:
+				brujula=(brujula+3)%4;
 
+				if(rand()%2==0)
+				girar_derecha=true;
+			else
+				girar_derecha=false;
 
-		/*while(getchar() != '\n');
-
-
-		for (int i = 0; i < mapaResultado.size(); ++i){
-			for(int j = 0; j < mapaResultado.at(i).size(); ++j)
-				//mapaResultado[i][j]=mapaDescubierto[i][j];
-				//if(mapaDescubierto[i][j]!='?')
-					mapaResultado[i][j]=mapaDescubierto[i][j];
-
+			break;
 		}
-	}*/
 
-	// En esta matriz de tamano 100x100 hay que escribir el mapa solucion
-	// mapaResultado[fila][columna] = lo que hay en fila columna
-
-if(!sensores.colision){
-	switch(ultimaAccion){
-
-		case actFORWARD:
-			switch(brujula){
-
-				case 0:		//NORTE
-				  fil--;
-				  x--;
-				 break;
-
-				 case 1:	//ESTE
-				   col++;
-				   y++;
-				 break;
-
-				 case 2:	//SUR
-				 	fil++;
-				 	x++;
-				 break;
-
-				 case 3:	//OESTE
-				 	col--;
-				 	y--;
-				 break;
-
-			}
-
-		break;
-
-
-//La brujula solo cambia cuando se realiza un giro
-
-		case actTURN_R:
-			brujula=(brujula+1)%4;
-
-			if(rand()%2==0)
-			girar_derecha=true;
-		else
-			girar_derecha=false;
-
-		break;
-
-
-
-		case actTURN_L:
-			brujula=(brujula+3)%4;
-
-			if(rand()%2==0)
-			girar_derecha=true;
-		else
-			girar_derecha=false;
-
-		break;
 	}
 
-}
+	//Si no estamos bien situados, es decir, no hemos encontrado un punto PK solo se rellena el mapaPrueba
 
+	if(!bien_situado){
+		RellenaMapa(sensores,brujula,false);
+		
+	}
 
-	//Cuando hayamos muerto se nos copiara lo descubierto en la matriz original (mapaResultado)
-
-	/*if(sensores.vida==0){
-
-
-	}*/
-
-if(!bien_situado){
-	RellenaMapa(sensores,brujula,false);
-	
-}
+//Si estamos bien situados se guardara el mapaPRueba en mapaResultado
 	else {
 
 		RellenaMapa(sensores, brujula,false);
 
 			for (int i = 0; i < mapaPrueba.size(); ++i){
-			for(int j = 0; j < mapaPrueba.at(i).size(); ++j)
+				for(int j = 0; j < mapaPrueba.at(i).size(); ++j)
 
-				if(mapaPrueba[i][j]!='?')
-					mapaResultado[i-(x-fil)][j-(y-col)]=mapaPrueba[i][j];
-}	
+					if(mapaPrueba[i][j]!='?')
+						mapaResultado[i-(x-fil)][j-(y-col)]=mapaPrueba[i][j];
+			}	
 
-		/*for (int i = 0; i < mapaResultado.size(); ++i){
-			for(int j = 0; j < mapaResultado.at(i).size(); ++j)
-				if(mapaResultado[i][j]=='?')
-				mapaResultado[i][j]=mapaDescubierto[i][j];
-					//mapaResultado[i][j]=mapaPrueba[x-sensores.mensajeF+i][y-sensores.mensajeC+j];
 		
-	}*/
-}
+	}
 
 
+	//Cuando se encuentra con un punto PK
 
 	if((sensores.terreno[0]=='K') && (!bien_situado)){
 		fil=sensores.mensajeF;
@@ -173,13 +137,12 @@ if(!bien_situado){
 
 	//sensores.objetoActivo='1';
 
-//avanzaremos si estamos en terreno arenoso o pedregoso y no hay ningun objeto 
-//o personaje en esa casilla
 
 
 
+//PULGARCITO
 
-	if(bien_situado){
+	/*if(bien_situado){
 		int min = numeric_limits<int>::max();
 
 
@@ -267,14 +230,15 @@ if(!bien_situado){
 
 	}
 
+*/
 
+
+	//avanzaremos si estamos en terreno arenoso o pedregoso y no hay ningun objeto o personaje en esa casilla
 
 	if((sensores.terreno[2]=='T'||sensores.terreno[2]=='S'||sensores.terreno[2]=='K') && sensores.superficie[2]=='_') {
 		accion=actFORWARD;
 	} 
 
-	//else if(sensores.objetoActivo=='1' && sensores.terreno[2]=='A')
-	//		accion=actFORWARD;
 
 	else if(!girar_derecha){
 		accion=actTURN_L;  //en caso de que no podamos seguir recto,giramos

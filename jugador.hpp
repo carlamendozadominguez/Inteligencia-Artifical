@@ -37,9 +37,9 @@ class ComportamientoJugador : public Comportamiento{
 
         std::vector<int> aux2(mapaResultado.size(),0);
       
-     /for(unsigned int i = 0; i<mapaResultado.size(); i++)
+     /*for(unsigned int i = 0; i<mapaResultado.size(); i++)
           mapaPulgarcito.push_back(aux2);
-
+*/
 
 
 
