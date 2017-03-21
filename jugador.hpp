@@ -23,6 +23,8 @@ class ComportamientoJugador : public Comportamiento{
        x=99;
        y=99;
 
+       cont=1;
+
       std::vector< unsigned char> aux(mapaResultado.size(), '?');
       
       for(unsigned int i = 0; i<mapaResultado.size(); i++)
@@ -37,9 +39,14 @@ class ComportamientoJugador : public Comportamiento{
 
         std::vector<int> aux2(mapaResultado.size(),0);
       
-     /*for(unsigned int i = 0; i<mapaResultado.size(); i++)
+     for(unsigned int i = 0; i<mapaResultado.size(); i++)
           mapaPulgarcito.push_back(aux2);
-*/
+
+         std::vector<int> aux3(200,0);
+      
+     for(unsigned int i = 0; i<200; i++)
+          mapaPulgarcitoAux.push_back(aux3);
+
 
 
 
@@ -56,9 +63,23 @@ class ComportamientoJugador : public Comportamiento{
 
     int Objeto_mochila(unsigned char objeto);
 
-    void RellenaMapa(Sensores sensores,int brujula,bool situado);
+    void RellenaMapa(Sensores sensores,int brujula,bool bien_situado);
 
     void DecisionObjeto(unsigned char obstaculo);
+
+    // define la accion a realizar siguiento el metodo 
+    // del Pulgarcito 
+    Action dondeVasPulgarcito(int, int); 
+
+    // devuelve true si no podemos pasar por una posicion
+    // dada
+    bool NoPuedesPasar(int,int); 
+
+
+    // devuelven los valroes para orientar a Pulgarcito
+    int tengoDelante(int,int); 
+    int tengoDerecha(int,int); 
+    int tengoIzquierda(int,int); 
 
 
 
@@ -68,12 +89,16 @@ class ComportamientoJugador : public Comportamiento{
 
   private:
 
-  	int fil,col,brujula;  //donde estoy? y hacia donde voy?
+  	int fil,col,brujula,cont;  //donde estoy? y hacia donde voy?
   	bool bien_situado;
   	Action ultimaAccion;
   	bool girar_derecha;
     std::vector< std::vector< unsigned char> > mapaDescubierto;
         std::vector< std::vector< unsigned char> > mapaPrueba;
+                std::vector< std::vector< int> > mapaPulgarcito;
+
+                std::vector< std::vector< int> > mapaPulgarcitoAux;
+
 
     int x,y;
 
