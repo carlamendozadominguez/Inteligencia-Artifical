@@ -11,12 +11,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	Action accion = actIDLE;
 
+	sensor=sensores;
 
-	cout << "Superficie: ";
+
+	/*cout << "Superficie: ";
 	for (int i=0; i<sensores.superficie.size(); i++)
 		cout << sensores.superficie[i];
 	cout << endl;
-
+*/
 	if(sensores.reset){
 		
 		brujula=0; //  0->Norte, 1-> Este , 2->Sur , 3->Oeste
@@ -133,7 +135,6 @@ if(!sensores.colision)
 }
 
 
-
 	if((sensores.terreno[0]=='K') && (!bien_situado)){
 		fil=sensores.mensajeF;
 		col=sensores.mensajeC;
@@ -141,22 +142,41 @@ if(!sensores.colision)
 	}
 
 
+	if(ultimaAccion==actPICKUP){
+		if(sensores.objetoActivo=='2' && !(sensores.superficie[2]=='0' ||sensores.superficie[2]=='1' || sensores.superficie[2]=='2' || sensores.superficie[2]=='3')){
+			//accion=actTURN_R;
+			maleta.push(sensores.objetoActivo);
+		}
+
+
+		else{
+			accion=actTHROW;
+		}
+	}
 
 //CUANDO ENCONTREMOS UN OBSTACULO IREMOS A DECISIONOBJETO
 
-	/*if(sensores.superficie[2]!='_'){
+	else if(sensores.superficie[2]=='0' ||sensores.superficie[2]=='1' || sensores.superficie[2]=='2' || sensores.superficie[2]=='3'){
 			cout<<"OBSTACULO!!!!"<<endl;
-		DecisionObjeto(sensores.superficie[2]);
-	}*/
+		accion=actPICKUP;
+	}
 
 
 //avanzaremos si estamos en terreno arenoso o pedregoso y no hay ningun objeto 
 //o personaje en esa casilla
+	else if(sensores.terreno[2]=='B' && ultimaAccion!=actPOP && maleta.front()=='2'){
+			accion=actPOP;
+			maleta.pop();
+		}
+
+	else if(ultimaAccion==actPOP)
+		accion=actFORWARD;
 
 
-	if(bien_situado && !sensores.colision) {
+	
+	else if(bien_situado && !sensores.colision) {
 
-		 if(sensores.vida % 5 == 0)
+		/* if(sensores.vida % 5 == 0)
 		 	for (int i = 0; i < mapaPulgarcito.size(); ++i)
 		 	{
 		 		for (int j = 0; j < mapaPulgarcito.size(); ++j)
@@ -164,13 +184,18 @@ if(!sensores.colision)
 		 			cerr << " " << mapaPulgarcito[i][j];
 		 		}
 		 		cerr << endl;
-		 	}
+		 	}*/
 
 		accion = dondeVasPulgarcito(fil,col);
-		cout << "accion"<<accion; 
+		//cout << "accion"<<accion; 
 	}
 
-	else{ // funcionamiento por a ciegas 
+	else{ // funcionamiento por a ciegas
+
+	if(sensores.colision)
+		accion=actTURN_R;
+
+	else 
 		if((sensores.terreno[2]=='T'||sensores.terreno[2]=='S'||sensores.terreno[2]=='K') && sensores.superficie[2]=='_') {
 			accion=actFORWARD;
 		}
@@ -191,7 +216,7 @@ if(!sensores.colision)
 	
 	ultimaAccion=accion;
 
-
+/*
 	cout << "Terreno: ";
 	for (int i=0; i<sensores.terreno.size(); i++)
 		cout << sensores.terreno[i];
@@ -207,7 +232,7 @@ if(!sensores.colision)
 	cout<<"fila:"<<fil<<endl;
 	cout<<"Col:"<<col<<endl;
 	cout << endl;
-
+*/
 	return accion;
 }
 
@@ -229,7 +254,7 @@ int ComportamientoJugador::interact(Action accion, int valor){
 
 void ComportamientoJugador::RellenaMapa(Sensores sensores,int brujula,bool bien_situado){
 
-cout<<"Bien situado:"<<bien_situado<<endl;
+//cout<<"Bien situado:"<<bien_situado<<endl;
 	int k=0;	// posiciones de los sensores 
 
 	if(bien_situado){
@@ -243,7 +268,7 @@ cout<<"Bien situado:"<<bien_situado<<endl;
 		for(int i=0;i>-4;i--){
 			for(int j=i;j<=abs(i);j++){
 
-				cout<<"x0:"<<x+i<<" "<<y+j<<endl;
+				//cout<<"x0:"<<x+i<<" "<<y+j<<endl;
 
 				mapaPrueba[x+i][y+j]=sensores.terreno[k];
 
@@ -267,7 +292,7 @@ cout<<"Bien situado:"<<bien_situado<<endl;
 		for(int i=0;i<=3;i++){
 			for(int j=-i;j<=i;j++){
 
-				cout<<"x1:"<<x+j<<" "<<y+i<<endl;
+				//cout<<"x1:"<<x+j<<" "<<y+i<<endl;
 
 				mapaPrueba[x+j][y+i]= sensores.terreno[k];
 				
@@ -290,7 +315,7 @@ cout<<"Bien situado:"<<bien_situado<<endl;
 		for(int i=0;i<=3;i++){
 			for(int j=i;abs(j)<=i;j--){
 
-				cout<<"x2:"<<x+i<<" "<<y+j<<endl;
+				//cout<<"x2:"<<x+i<<" "<<y+j<<endl;
 
 				mapaPrueba[x+i][y+j]=sensores.terreno[k];
 
@@ -311,7 +336,7 @@ cout<<"Bien situado:"<<bien_situado<<endl;
 		for(int i=0;i<=3;i++){
 			for(int j=i;abs(j)<=i;j--){
 
-				cout<<"x3:"<<x+j<<" "<<y-i<<endl;
+				//cout<<"x3:"<<x+j<<" "<<y-i<<endl;
 
 				mapaPrueba[x+j][y-i]=sensores.terreno[k];
 
@@ -399,7 +424,7 @@ int ComportamientoJugador::Objeto_mochila(unsigned char objeto){
 bool ComportamientoJugador::NoPuedesPasar(int fila, int col)
 {
 	bool no_puedes_pasar = false; // por defecto puedes pasar 
-	if (mapaResultado[fila][col] == 'B' || mapaResultado[fila][col] == 'M' || mapaResultado[fila][col] == 'A' || mapaResultado[fila][col]=='P' || mapaResultado[fila][col]=='D')
+	if (mapaResultado[fila][col] == 'B' && sensor.objetoActivo!='2' || mapaResultado[fila][col] == 'M' || mapaResultado[fila][col] == 'A' || mapaResultado[fila][col]=='P' || mapaResultado[fila][col]=='D' )
 	{
 		no_puedes_pasar = true; 
 	}
@@ -431,11 +456,11 @@ Action ComportamientoJugador::dondeVasPulgarcito(int fila, int columna)
 	}else if(tengoDerecha(fila,columna)== 0){
 		siguiente_accion = actTURN_R;
 	}else{
-		if(rand()%2==0){	
+		//if(rand()%2==0){	
 			siguiente_accion = actTURN_L ;
-		}else{
+		//}else{
 			siguiente_accion = actTURN_R ;
-		}
+		//}
 	}
 	return siguiente_accion;
 }
@@ -521,3 +546,7 @@ int ComportamientoJugador::tengoDerecha(int fila, int columna)
 // 	return accion_pulgarcito; 
 	
 // }
+
+
+
+

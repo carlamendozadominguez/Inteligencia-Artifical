@@ -2,7 +2,7 @@
 #define COMPORTAMIENTOJUGADOR_H
 
 #include <vector>
-
+#include <queue>
 
 #include "comportamientos/comportamiento.hpp"
 using namespace std;
@@ -42,11 +42,7 @@ class ComportamientoJugador : public Comportamiento{
      for(unsigned int i = 0; i<mapaResultado.size(); i++)
           mapaPulgarcito.push_back(aux2);
 
-         std::vector<int> aux3(200,0);
-      
-     for(unsigned int i = 0; i<200; i++)
-          mapaPulgarcitoAux.push_back(aux3);
-
+         
 
 
 
@@ -94,11 +90,12 @@ class ComportamientoJugador : public Comportamiento{
   	Action ultimaAccion;
   	bool girar_derecha;
     std::vector< std::vector< unsigned char> > mapaDescubierto;
-        std::vector< std::vector< unsigned char> > mapaPrueba;
-                std::vector< std::vector< int> > mapaPulgarcito;
+    std::vector< std::vector< unsigned char> > mapaPrueba;
+    std::vector< std::vector< int> > mapaPulgarcito;
 
-                std::vector< std::vector< int> > mapaPulgarcitoAux;
+    Sensores sensor;
 
+    std::queue<char> maleta;
 
     int x,y;
 
