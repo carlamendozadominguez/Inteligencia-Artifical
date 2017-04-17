@@ -6,19 +6,12 @@
 using namespace std;
 
 
-
+// método para controlar la lógica del agente reactivo 
 Action ComportamientoJugador::think(Sensores sensores){
 
 	Action accion = actIDLE;
 
-	sensor=sensores;
-
-
-	/*cout << "Superficie: ";
-	for (int i=0; i<sensores.superficie.size(); i++)
-		cout << sensores.superficie[i];
-	cout << endl;
-*/
+	
 	if(sensores.reset){
 		
 		brujula=0; //  0->Norte, 1-> Este , 2->Sur , 3->Oeste
@@ -27,27 +20,19 @@ Action ComportamientoJugador::think(Sensores sensores){
     	bien_situado=false;
     	fil=99;
     	col=99;
-
-		/*for(std::vector<unsigned char> v: mapaResultado){
-			for (unsigned char c : v)
-			{
-				cout << c;
-			}
-		}*/
+    	x=99;
+    	y = 99;
 
 
+		// inicialiar la matrix mapaPulgarcitoMax a cero
+		// inicializar la matrix mapaPrueba a ?
 		for(int i = 0 ; i < mapaPrueba.size() ; i++){
     		for(int j = 0 ; j < mapaPrueba.at(i).size() ;j++){
     			mapaPrueba[i][j]='?';
+    			mapaPulgarcitoMax[i][j]=0;
     		}
 	}
 }
-
-		
-
-
-	// En esta matriz de tamano 100x100 hay que escribir el mapa solucion
-	// mapaResultado[fila][columna] = lo que hay en fila columna
 
 if(!sensores.colision)
 	switch(ultimaAccion){
@@ -58,21 +43,25 @@ if(!sensores.colision)
 				case 0:		//NORTE
 				  fil--;
 				  x--;
+				  ;
 				 break;
 
 				 case 1:	//ESTE
 				   col++;
 				   y++;
+				  
 				 break;
 
 				 case 2:	//SUR
 				 	fil++;
 				 	x++;
+				 	
 				 break;
 
 				 case 3:	//OESTE
 				 	col--;
 				 	y--;
+				
 				 break;
 
 			}
@@ -106,35 +95,28 @@ if(!sensores.colision)
 
 
 
-	//Cuando hayamos muerto se nos copiara lo descubierto en la matriz original (mapaResultado)
 
-	/*if(sensores.vida==0){
 
-	}*/
-
-	//Si no estamos bien situados, es decir, no hemos encontrado un punto PK solo se rellena el mapaPrueba
-
-	if(!bien_situado){
+	
+	if(!bien_situado){  //Si no estamos bien situados, es decir, no hemos encontrado un punto PK,solo se rellena el mapaPrueba
 		RellenaMapa(sensores,brujula,false);
-		
 	}
 
-//Si estamos bien situados se guardara el mapaPRueba en mapaResultado
-	else {
-
+	
+	else {  //Si estamos bien situados se guardara el mapaPRueba en mapaResultado
 		RellenaMapa(sensores, brujula,true);
-
 			for (int i = 0; i < mapaPrueba.size(); ++i){
-				for(int j = 0; j < mapaPrueba.at(i).size(); ++j)
-
-					if(mapaPrueba[i][j]!='?')
+				for(int j = 0; j < mapaPrueba.at(i).size(); ++j){
+					//cerr << "mapaPrueba.size(): " << mapaPrueba.size() << "mapaPrueba.at(i).size(): "<< mapaPrueba.at(i).size() << endl;
+					if(mapaPrueba[i][j]!='?') {
 						mapaResultado[i-(x-fil)][j-(y-col)]=mapaPrueba[i][j];
+						mapaPulgarcitoMin.at(i-(x-fil)).at(j-(y-col))+=mapaPulgarcitoMax.at(i).at(j);
+					}
+				}
 			}	
-
-		
 }
 
-
+	
 	if((sensores.terreno[0]=='K') && (!bien_situado)){
 		fil=sensores.mensajeF;
 		col=sensores.mensajeC;
@@ -143,9 +125,10 @@ if(!sensores.colision)
 
 
 	if(ultimaAccion==actPICKUP){
-		if(sensores.objetoActivo=='2' && !(sensores.superficie[2]=='0' ||sensores.superficie[2]=='1' || sensores.superficie[2]=='2' || sensores.superficie[2]=='3')){
+		if((sensores.objetoActivo=='2' || sensores.objetoActivo=='1') && !(sensores.superficie[2]=='0' ||sensores.superficie[2]=='1' || sensores.superficie[2]=='2' || sensores.superficie[2]=='3')){
 			//accion=actTURN_R;
-			maleta.push(sensores.objetoActivo);
+			if((sensores.objetoActivo=='2' && maleta.front()=='1') || (sensores.objetoActivo=='1' && maleta.front()=='2') || maleta.empty() )
+				maleta.push(sensores.objetoActivo);
 		}
 
 
@@ -154,86 +137,67 @@ if(!sensores.colision)
 		}
 	}
 
+
 //CUANDO ENCONTREMOS UN OBSTACULO IREMOS A DECISIONOBJETO
 
 	else if(sensores.superficie[2]=='0' ||sensores.superficie[2]=='1' || sensores.superficie[2]=='2' || sensores.superficie[2]=='3'){
 			cout<<"OBSTACULO!!!!"<<endl;
-		accion=actPICKUP;
-	}
+			accion=actPICKUP;
 
+	}
 
 //avanzaremos si estamos en terreno arenoso o pedregoso y no hay ningun objeto 
 //o personaje en esa casilla
-	else if(sensores.terreno[2]=='B' && ultimaAccion!=actPOP && maleta.front()=='2'){
+	/*else if(sensores.terreno[2]=='B' && ultimaAccion!=actPOP && maleta.front()=='1'){
 			accion=actPOP;
 			maleta.pop();
 		}
 
+	else if(sensores.terreno[2]=='A' && ultimaAccion!=actPOP && maleta.front()=='2'){
+			accion=actPOP;
+			maleta.pop();
+		}
+*/
+
+	else if(sensores.terreno[2]=='B' && maleta.front()=='2'){
+
+		accion=actPOP;
+			maleta.pop();
+		}
+
+
+	else if(sensores.terreno[2]=='A' && maleta.front()=='1'){
+
+		accion=actPOP;
+			maleta.pop();
+		} 
+
+	else if(sensores.terreno[2]=='B' && maleta.front()!='2' && maleta.size()>=2){
+
+		accion=actPOP;
+		maleta.pop();
+	}
+	//else if(sensores.terreno[2]=='B' && ultimaAccion!=actPOP && maleta.front()!='1')
 	else if(ultimaAccion==actPOP)
-		accion=actFORWARD;
+		accion=actPUTDOWN;
 
 
 	
-	else if(bien_situado && !sensores.colision) {
+	else if(bien_situado /*&& !sensores.colision*/) {
 
-		/* if(sensores.vida % 5 == 0)
-		 	for (int i = 0; i < mapaPulgarcito.size(); ++i)
-		 	{
-		 		for (int j = 0; j < mapaPulgarcito.size(); ++j)
-		 		{
-		 			cerr << " " << mapaPulgarcito[i][j];
-		 		}
-		 		cerr << endl;
-		 	}*/
+		accion = dondeVasPulgarcito(fil,col,mapaPulgarcitoMin,sensores,sensores.superficie[2]);
 
-		accion = dondeVasPulgarcito(fil,col);
-		//cout << "accion"<<accion; 
 	}
 
-	else{ // funcionamiento por a ciegas
-
-	if(sensores.colision)
-		accion=actTURN_R;
-
-	else 
-		if((sensores.terreno[2]=='T'||sensores.terreno[2]=='S'||sensores.terreno[2]=='K') && sensores.superficie[2]=='_') {
-			accion=actFORWARD;
-		}
-
-
-		else if(!girar_derecha){
-			accion=actTURN_L;  //en caso de que no podamos seguir recto,giramos
-		}
-
-		else{
-			accion=actTURN_R;
-		}
-		
+	else{ // no hay más ciego que el que no quiere ver 
+		accion=dondeVasPulgarcito(x,y,mapaPulgarcitoMax,sensores,sensores.superficie[2]);
 	}
 
 
-	//Recordar la ultima accion
-	
 	ultimaAccion=accion;
 
-/*
-	cout << "Terreno: ";
-	for (int i=0; i<sensores.terreno.size(); i++)
-		cout << sensores.terreno[i];
-	cout << endl;
-
-	
-
-	cout << "Mochila: " << sensores.mochila << endl;
-	cout << "Reset: " << sensores.reset << endl;
-	cout << "Vida: " << sensores.vida << endl;
-	cout<<"colision:"<<sensores.colision<<endl;
-	cout << "objetoActivo: " << sensores.objetoActivo << endl;
-	cout<<"fila:"<<fil<<endl;
-	cout<<"Col:"<<col<<endl;
-	cout << endl;
-*/
 	return accion;
+	
 }
 
 int ComportamientoJugador::interact(Action accion, int valor){
@@ -249,267 +213,170 @@ int ComportamientoJugador::interact(Action accion, int valor){
  *				   observe en esas 15 casillas segun hacia donde este mirando.								*
  *																											*
  ************************************************************************************************************/
-
-
-
 void ComportamientoJugador::RellenaMapa(Sensores sensores,int brujula,bool bien_situado){
 
-//cout<<"Bien situado:"<<bien_situado<<endl;
+
 	int k=0;	// posiciones de los sensores 
 
 	if(bien_situado){
-		mapaPulgarcito[fil][col]=cont;
+		mapaPulgarcitoMin[fil][col]=cont;
 		cont++;
-}
-//Si nuestro jugador mira al NORTE
+	} else {
+		mapaPulgarcitoMax[x][y]=cont;
+		cont++;
+	}
 
-	 if(brujula==0){  
+
+	 if(brujula==0){   //Si nuestro jugador mira al NORTE
 	
 		for(int i=0;i>-4;i--){
 			for(int j=i;j<=abs(i);j++){
-
-				//cout<<"x0:"<<x+i<<" "<<y+j<<endl;
-
 				mapaPrueba[x+i][y+j]=sensores.terreno[k];
-
-
-
-				/*if(sensores.terreno[k]=='M' || sensores.terreno[k]=='A' || sensores.terreno[k]=='P')
-					mapaPulgarcito[fil+i][col+j]=numeric_limits<int>::max();
-*/
 					k++;
 				}
 			}
-
-		
 	}
 
-
-//Si nuestro jugador mira al ESTE
-
-	if(brujula==1){   
-
+	if(brujula == 1){  // jugador mira al este  
 		for(int i=0;i<=3;i++){
 			for(int j=-i;j<=i;j++){
-
-				//cout<<"x1:"<<x+j<<" "<<y+i<<endl;
-
 				mapaPrueba[x+j][y+i]= sensores.terreno[k];
-				
-
-				/*if(sensores.terreno[k]=='M' || sensores.terreno[k]=='A' || sensores.terreno[k]=='P')
-					mapaPulgarcito[fil+j][col+i]=numeric_limits<int>::max();
-*/
 				k++;
-
 			}	
 		}
-
 	}
-
-
-//Si nuestro jugador mira al SUR
-
-	else if(brujula==2){  
+	else if(brujula==2){  //Si nuestro jugador mira al SUR
 				
 		for(int i=0;i<=3;i++){
 			for(int j=i;abs(j)<=i;j--){
-
-				//cout<<"x2:"<<x+i<<" "<<y+j<<endl;
-
 				mapaPrueba[x+i][y+j]=sensores.terreno[k];
-
-/*				if(sensores.terreno[k]=='M' || sensores.terreno[k]=='A' || sensores.terreno[k]=='P')
-					mapaPulgarcito[fil+i][col+j]=numeric_limits<int>::max();
-*/
 				k++;
 			}
 		}
-
-		
 	}
-
-
-//Si nuestro jugador mira al OESTE
-
-	else if(brujula==3){     
+	else if(brujula==3){  // jugador mira al oeste     
 		for(int i=0;i<=3;i++){
 			for(int j=i;abs(j)<=i;j--){
-
-				//cout<<"x3:"<<x+j<<" "<<y-i<<endl;
-
 				mapaPrueba[x+j][y-i]=sensores.terreno[k];
 
-/*				if(sensores.terreno[k]=='M' || sensores.terreno[k]=='A' || sensores.terreno[k]=='P')
-					mapaPulgarcito[fil+j][col-i]=numeric_limits<int>::max();
-*/
 				k++;
 			}
-		}
-
-
-		
-	}
-
-		
-
-
+		}	
+	}		
 }
 
-/************************************************************************************************************
- * DecisionObjeto --> Le pasaremos el obstaculo, dependiendo del obstaculo del que se trate tomaremos una   *
- * 					  decision diferente.																	*
- *																											*
- ************************************************************************************************************/
-/*
-void ComportamientoJugador::DecisionObjeto(unsigned char obstaculo){
 
-
-int pos=-1;
-
-		switch(obstaculo){
-
-			case 'd':
-				//Comprobar si tenemos llave en la mochila
-				pos=Objeto_mochila(3); //El numero 3 es la llave!
-				//hacer funcion que compruebe lo que tenemos en la mochila y ponga en la mano lo que queramos
-			break;
-
-			case 'l':
-				//tirar hueso, mirar en la funcion
-			cout<<"hola";
-			break;
-
-			case '0':
-				//meter en la mochila si no esta
-				cout<<"ssdf";
-			break;
-
-			case '1':
-				//meter en la mochila si no esta
-			break;
-
-			case '2':
-				//meter en la mochila si no esta
-			break;
-
-			case '3':
-				//meter en la mochila si no esta
-			break;
-
-		}
-
-	}
-
-
-*/
-/************************************************************************************************************
- * Objeto_mochila --> comprobara si el objeto se encuentra en la mochila y en que posicion				   	*
- * 					  																						*																											*
- ************************************************************************************************************/
-
-int ComportamientoJugador::Objeto_mochila(unsigned char objeto){
-
-	int pos_objeto=-1;
-	Sensores sensores;
-
-		if(sensores.mochila==objeto) //DUDO QUE ESTE BIEN!!!
-			pos_objeto=0;
-
-	return pos_objeto;
-	
-}
 
 // Devuelve true si no podemos pasar po la posicion (fila,col)
-bool ComportamientoJugador::NoPuedesPasar(int fila, int col)
+bool ComportamientoJugador::NoPuedesPasar(int fila, int col, Sensores sensor,char personaje)
 {
 	bool no_puedes_pasar = false; // por defecto puedes pasar 
-	if (mapaResultado[fila][col] == 'B' && sensor.objetoActivo!='2' || mapaResultado[fila][col] == 'M' || mapaResultado[fila][col] == 'A' || mapaResultado[fila][col]=='P' || mapaResultado[fila][col]=='D' )
-	{
-		no_puedes_pasar = true; 
+
+	cout<<personaje<<endl;
+	
+	if(bien_situado){
+		if (personaje == 'l' || personaje == 'a' || mapaResultado[fila][col] == 'B' && sensor.objetoActivo!='2' || mapaResultado[fila][col] == 'M' || mapaResultado[fila][col] == 'A' && sensor.objetoActivo!='1' || mapaResultado[fila][col]=='P' || mapaResultado[fila][col]=='D' ){
+			no_puedes_pasar = true; 
+		}
+
 	}
+	else{ // no está bien situado 
+		if (personaje == 'l' ||personaje == 'a' || mapaPrueba[fila][col] == 'B' && sensor.objetoActivo!='2' || mapaPrueba[fila][col] == 'M' || mapaPrueba[fila][col] == 'A' && sensor.objetoActivo!='1'|| mapaPrueba[fila][col]=='P' || mapaPrueba[fila][col]=='D' ){
+			no_puedes_pasar = true; 
+		}
+
+	}
+
+cout<<"no puedes pasar"<<no_puedes_pasar<<endl;
 	return no_puedes_pasar; 
 }
 
 
+// controla el comportamiento del método pulgarcito 
+Action ComportamientoJugador::dondeVasPulgarcito(int fila, int columna, std::vector< std::vector< int> > mapaPulgarcito, Sensores sensor,char personaje){	
 
-Action ComportamientoJugador::dondeVasPulgarcito(int fila, int columna)
-{	
 
 	Action siguiente_accion; 	// accion a devolver 
-	if ( (tengoDelante(fila,columna) < tengoDerecha(fila,columna)) && 
-		 (tengoDelante(fila,columna) < tengoIzquierda(fila,columna)))
+	if ( (tengoDelante(fila,columna,mapaPulgarcito, sensor,personaje) < tengoDerecha(fila,columna,mapaPulgarcito, sensor,personaje)) && 
+		 (tengoDelante(fila,columna,mapaPulgarcito, sensor,personaje) < tengoIzquierda(fila,columna,mapaPulgarcito, sensor,personaje)))
 	{
 		// la posición que tengo delante tiene un valor más bajo 
 		siguiente_accion = actFORWARD; 	
-	}else if ( (tengoDerecha(fila,columna) < tengoDelante(fila,columna)) and (tengoDerecha(fila,columna) < tengoIzquierda(fila,columna) ) ){
+	}else if ( (tengoDerecha(fila,columna,mapaPulgarcito, sensor,personaje) < tengoDelante(fila,columna,mapaPulgarcito, sensor,personaje)) and (tengoDerecha(fila,columna,mapaPulgarcito, sensor,personaje) < tengoIzquierda(fila,columna,mapaPulgarcito, sensor,personaje) ) ){
 			siguiente_accion = actTURN_R;
+			cout<<"voy derecha"<<endl;
 
-	}else if ((tengoIzquierda(fila,columna) < tengoDerecha(fila,columna)) and (tengoIzquierda(fila,columna) < tengoDelante(fila,columna) ) ){
+	}else if ((tengoIzquierda(fila,columna,mapaPulgarcito, sensor,personaje) < tengoDerecha(fila,columna,mapaPulgarcito, sensor,personaje)) and (tengoIzquierda(fila,columna,mapaPulgarcito, sensor,personaje) < tengoDelante(fila,columna,mapaPulgarcito, sensor,personaje) ) ){
 			siguiente_accion = actTURN_L;
+			cout<<"voy izquierdax"<<endl;
 
-	}else if (tengoDelante(fila,columna)== 0 ) {
+	}else if (tengoDelante(fila,columna,mapaPulgarcito, sensor,personaje)== 0 ) {
 		siguiente_accion = actFORWARD;
+		cout<<"voy recto"<<endl;
 
-	}else if(tengoIzquierda(fila,columna)== 0){
+	}else if(tengoIzquierda(fila,columna,mapaPulgarcito, sensor,personaje)== 0){
 		siguiente_accion = actTURN_L;
-	}else if(tengoDerecha(fila,columna)== 0){
+		cout<<"voy izquierday"<<endl;
+	}else if(tengoDerecha(fila,columna,mapaPulgarcito, sensor,personaje)== 0){
 		siguiente_accion = actTURN_R;
+		cout<<"voy derecha"<<endl;
 	}else{
-		//if(rand()%2==0){	
-			siguiente_accion = actTURN_L ;
-		//}else{
 			siguiente_accion = actTURN_R ;
-		//}
+			cout<<"voy derecha"<<endl;
 	}
 	return siguiente_accion;
 }
 
-// devuelve qué tengo delante de la posición pasada
-// si no puedo pasar por esa posición, devuelve un número
-// muy grande 
-int ComportamientoJugador::tengoDelante(int fila, int columna)
+
+
+// ============================================================================================
+
+// Funciones auxiliares para el comportameinto de pulgarcito
+// Las siguientes funciones devuelve un número muy grande si no se puede pasar por la posición 
+// deseada (hacia delante, derecha, izquierda) y devolverán la siguiente posisión a recorrer si 
+// se puede pasar por ella. 
+// Para estas comprobaciones se hace uso de la función NoPuedesPasar(int,int)
+int ComportamientoJugador::tengoDelante(int fila, int columna, std::vector< std::vector< int> > mapaPulgarcito ,Sensores sensor,char personaje)
 {
 	int max = numeric_limits<int>::max(); 	// ... el numero muy grande
 	switch(brujula){
 		case 0: 
-			if(NoPuedesPasar(fila-1,columna)) return max; 
+			if(NoPuedesPasar(fila-1,columna, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila-1][columna]; 
 			break; 
 		case 1: 
-			if(NoPuedesPasar(fila,columna+1)) return max; 
+			if(NoPuedesPasar(fila,columna+1, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila][columna+1];
 			break;
 		case 2: 
-			if(NoPuedesPasar(fila+1,columna)) return max; 
+			if(NoPuedesPasar(fila+1,columna, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila+1][columna];
 			break;
 		case 3: 
-			if(NoPuedesPasar(fila,columna-1)) return max; 
+			if(NoPuedesPasar(fila,columna-1, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila][columna-1];
 			break;
 	}
 }
 
-// devuelve qué debo poner en el mapa pulgarcito a la izquierda
-int ComportamientoJugador::tengoIzquierda(int fila, int columna)
+int ComportamientoJugador::tengoIzquierda(int fila, int columna, std::vector< std::vector< int> > mapaPulgarcito, Sensores sensor,char personaje)
 {
 	int max = numeric_limits<int>::max(); 	// ... el numero muy grande
 	switch(brujula){
 		case 0: 
-			if(NoPuedesPasar(fila,columna-1)) return max; 
+			if(NoPuedesPasar(fila,columna-1, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila][columna-1]; 
 			break; 
 		case 1: 
-			if(NoPuedesPasar(fila-1,columna)) return max; 
+			if(NoPuedesPasar(fila-1,columna, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila-1][columna];
 			break;
 		case 2: 
-			if(NoPuedesPasar(fila,columna+1)) return max; 
+			if(NoPuedesPasar(fila,columna+1, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila][columna+1];
 			break;
 		case 3: 
-			if(NoPuedesPasar(fila+1,columna)) return max; 
+			if(NoPuedesPasar(fila+1,columna, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila+1][columna];
 			break;
 	}
@@ -517,36 +384,27 @@ int ComportamientoJugador::tengoIzquierda(int fila, int columna)
 
 
 
-int ComportamientoJugador::tengoDerecha(int fila, int columna)
+int ComportamientoJugador::tengoDerecha(int fila, int columna, std::vector< std::vector< int> > mapaPulgarcito, Sensores sensor,char personaje)
 {
 	int max = numeric_limits<int>::max(); 	// ... el numero muy grande
 	switch(brujula){
 		case 0: 
-			if(NoPuedesPasar(fila,columna+1)) return max; 
+			if(NoPuedesPasar(fila,columna+1, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila][columna+1]; 
 			break; 
 		case 1: 
-			if(NoPuedesPasar(fila+1,columna)) return max; 
+			if(NoPuedesPasar(fila+1,columna, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila+1][columna];
 			break;
 		case 2: 
-			if(NoPuedesPasar(fila,columna-1)) return max; 
+			if(NoPuedesPasar(fila,columna-1, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila][columna-1];
 			break;
 		case 3: 
-			if(NoPuedesPasar(fila-1,columna)) return max; 
+			if(NoPuedesPasar(fila-1,columna, sensor,personaje)) return max; 
 			else return mapaPulgarcito[fila-1][columna];
 			break;
 	}
 }
 
-// // aplica el metodo pulgarcito 
-// void ComportamientoJugador::Pulgarcito(){
-// 	Action accion_pulgarcito = dondeVasPulgarcito(); 
-// 	return accion_pulgarcito; 
-	
-// }
-
-
-
-
+// ==================== Fin funciones auxiliares para pulgarcito ========================================
