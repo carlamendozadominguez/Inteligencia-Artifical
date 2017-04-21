@@ -24,23 +24,46 @@ class ComportamientoJugador : public Comportamiento{
        y=99;
        cont=1;
 
+//Inicializamos a T todo el mapa resultado para que haya mayor porcentaje de coincidencia
 
-       
-       std::vector< unsigned char> aux1(200, '?');
+       for(int i = 0 ; i < mapaResultado.size() ; i++){
+    			for(int j = 0 ; j < mapaResultado.at(i).size() ;j++){
+						mapaResultado[i][j]='T';
+				}
+			}
+
+    
       
-      for(unsigned int i = 0; i<200; i++)
-          mapaPrueba.push_back(aux1);
+   //Mapa donde se guardara los distintos terrenos encontrados       
+    std::vector< unsigned char> aux1(200, '?');
+      
+    for(unsigned int i = 0; i<200; i++)
+       mapaPrueba.push_back(aux1);
 
-
-        std::vector<int> aux2(mapaPrueba.size(),0);
+    //Mapa pulgarcito , para cuando vamos a ciegas por el mapa
+     std::vector<int> aux2(mapaPrueba.size(),0);
       
      for(unsigned int i = 0; i<mapaPrueba.size(); i++)
           mapaPulgarcitoMax.push_back(aux2);
 
-        std::vector<int> aux3(mapaResultado.size(),0);
+    //Mapa pulgarcito para cuando llegamos a un punto PK y ya estamos bien ubicados
+    std::vector<int> aux3(mapaResultado.size(),0);
       
      for(unsigned int i = 0; i<mapaResultado.size(); i++)
           mapaPulgarcitoMin.push_back(aux3);
+
+    //Mapa que nos guarda los objetos encontrados para luego tratarlos como obstaculos
+     std::vector< unsigned char> aux4(200, '_');
+      
+      for(unsigned int i = 0; i<200; i++)
+          mapaObjetoCiego.push_back(aux4);
+
+       
+    //Mapa que nos guarda los objetos cuando ya estamos ubicados
+      std::vector< unsigned char> aux5(mapaResultado.size(), '_');
+      
+      for(unsigned int i = 0; i<mapaResultado.size(); i++)
+          mapaObjetos.push_back(aux5);
         
 }
     
@@ -50,11 +73,11 @@ class ComportamientoJugador : public Comportamiento{
 
     Action think(Sensores sensores);
 
-    bool esta_en_mochila(char);
+    bool esta_en_mochila(char);  //Se le manda un objeto y nos dice si se encuntra ya en la mochila
 
     int interact(Action accion, int valor);
 
-    // rellena el mapa 
+    // Rellena el mapa con los terrenos y objetos encontrados
     void RellenaMapa(Sensores sensores,int brujula,bool bien_situado);
 
 
@@ -71,34 +94,58 @@ class ComportamientoJugador : public Comportamiento{
     int tengoIzquierda(int,int, std::vector< std::vector< int> >,Sensores sensores); 
 
 
-
+    bool mochila_llena(void);
 
     ComportamientoJugador * clone(){return new ComportamientoJugador(*this);}
 
+    //AGENTE DELIBERATIVO
+    bool hayObstaculoDelante(const vector<unsigned char> & terreno, const vector<unsigned char> & superficie, Sensores sensor);
 
-  private:
+
+private:
 
   	int fil,col,brujula,cont;  //donde estoy? y hacia donde voy?
   	bool bien_situado;        // he encontrado un método PK 
   	Action ultimaAccion;
   	bool girar_derecha;
-    std::vector< std::vector< unsigned char> > mapaDescubierto;
-    std::vector< std::vector< unsigned char> > mapaPrueba;
 
+
+    //Declaramos los diferentes mapas para poder movernos por el mapa
+
+    std::vector< std::vector< unsigned char> > mapaPrueba;
+    std::vector< std::vector< unsigned char> > mapaObjetos;
+    std::vector< std::vector< unsigned char> > mapaObjetoCiego;
     std::vector< std::vector< int> > mapaPulgarcitoMax;
-      // aplicación del método pulgarcito si no conocemos el punto PK aún o si no estás
-      // bien situado
     std::vector< std::vector< int> > mapaPulgarcitoMin;
-      // aplicación del método pulgarcito si conocemos el método PK y estamos ubicados en
-      // el mapa  
 
     Sensores sensor;
 
-    std::list<char> maleta;
+    std::list<char> maleta; //La maleta aunque es de tipo lista funciona como una cola FIFO
 
     // controlan el movimiento cuando no conocemos la posición PK aún 
-    int x, 
-        y;  
+    int x,y;  
+
+
+
+    //AGENTE DELIBERATIVO
+    struct estado{
+      int fila;
+      int columna;
+      int orientacion;
+    };
+
+
+   bool tengo_regalo;  //Variable de estado
+
+    // Para el plan
+    bool estoy_ejecutando_plan;
+    bool error_plan;
+    list <Action> plan;
+
+    bool pathFinding(const estado &origen, const estado &destino, list<Action> &plan);
+
+    
+   
 
 };
 
